@@ -1,14 +1,14 @@
 <?php
 /**
  * @package DesktopServer for WordPress
- * @version 1.0.0
+ * @version 1.1.1
  */
 /*
 Plugin Name: DesktopServer for WordPress
 Plugin URI: http://serverpress.com/products/desktopserver/
 Description: DesktopServer for WordPress eases localhost to live server deployment by publishing hosting provider server details via a protected XML-RPC feed to an authorized administrator only. It also provides assisted deployments to hosting providers that support file system direct. For more information, please visit http://serverpress.com/.
 Author: Stephen Carroll
-Version: 1.0.0
+Version: 1.1.1
 Author URI: http://steveorevo.com/
 */
 
@@ -99,6 +99,13 @@ class DesktopServer {
             return 'Error - Unable to initialize compatible WP_Filesystem.';
         }
         
+        // Create our temp deployment folder if missing
+        if ( false == $wp_filesystem->is_dir( $this->ds_deploy ) ){
+            if ( false == $wp_filesystem->mkdir( $this->ds_deploy ) ){
+                return 'Error - Cannot create ds-deploy folder. ';
+            }
+        }
+        
         // Process data chunks using WP_Filesystem where ever possible
         while ( count($args) != 0 ){
             $file = $this->ds_deploy . array_shift($args);
@@ -122,6 +129,7 @@ class DesktopServer {
             
             // Create path if it doesn't exist (WP_Filesystem doesn't do recursive paths)
             $path = $this->delRightMost($file, '/');
+            $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
             if ( is_dir( $path ) === false ){
                 if ( mkdir( $path, FS_CHMOD_DIR, true ) === false ){
                     return 'Error - Cannot create folder path. ';
@@ -162,10 +170,6 @@ class DesktopServer {
         // Destory any prior deployment folder
         $wp_filesystem->rmdir( $this->ds_deploy, true );
                 
-        // Create our temp deployment folder 
-        if ( false == $wp_filesystem->mkdir( $this->ds_deploy ) ){
-            return 'Error - Cannot create ds-deploy folder. ';
-        }
         return 'ok';
     }
     function ds_end_xfer( $args ){
