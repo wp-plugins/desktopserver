@@ -1,17 +1,16 @@
 <?php
 /**
  * @package DesktopServer for WordPress
- * @version 1.1.1
+ * @version 1.2.0
  */
 /*
 Plugin Name: DesktopServer for WordPress
 Plugin URI: http://serverpress.com/products/desktopserver/
 Description: DesktopServer for WordPress eases localhost to live server deployment by publishing hosting provider server details via a protected XML-RPC feed to an authorized administrator only. It also provides assisted deployments to hosting providers that support file system direct. For more information, please visit http://serverpress.com/.
 Author: Stephen Carroll
-Version: 1.1.1
+Version: 1.2.0
 Author URI: http://steveorevo.com/
 */
-
 class DesktopServer {
     
     public $ds_deploy;
@@ -19,7 +18,7 @@ class DesktopServer {
     
     function __construct(){
         add_filter( 'xmlrpc_methods', array($this, 'xmlrpc_methods') );
-        $this->ds_deploy = ABSPATH . 'ds-deploy';
+        $this->ds_deploy = $_SERVER['DOCUMENT_ROOT'] . '/ds-deploy';
         $this->error = '';
     }
     function xmlrpc_methods( $methods ){
@@ -84,6 +83,11 @@ class DesktopServer {
             }
         }
         $server_details['FS_METHOD'] = $fsm;
+        
+        // Save details to session for db_runnner.php
+        if ( !session_id() ) session_start();
+        $server_details['session_id'] = session_id();
+        $_SESSION['server_details'] = $server_details;
         return $server_details;
     }
     function ds_receive_xfer( $args ){
@@ -107,6 +111,7 @@ class DesktopServer {
         }
         
         // Process data chunks using WP_Filesystem where ever possible
+        $temp = $this->ds_deploy . '/temp-ds-deploy';
         while ( count($args) != 0 ){
             $file = $this->ds_deploy . array_shift($args);
             $is_zip = array_shift($args);
@@ -116,7 +121,6 @@ class DesktopServer {
             if ( $is_zip ){
             
                 // Write chunk to temp file
-                $temp = $this->ds_deploy . '/temp-ds-deploy';
                 $wp_filesystem->put_contents( $temp . '.zip', $data );
 
                 // Unzip chunk
@@ -462,5 +466,12 @@ class DesktopServer {
         return $sSource;
     }
 }
+
+// Attempt to bump up meager memory hosts
+if((int) @ini_get('memory_limit') < 64){
+    if(strpos(ini_get('disable_functions'), 'ini_set') === false){
+        @ini_set('memory_limit', '64M'); 
+    }
+}
+@set_time_limit( 600 );
 new DesktopServer();
-?>
