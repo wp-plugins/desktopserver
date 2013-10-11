@@ -1,24 +1,30 @@
 <?php
 /**
  * @package DesktopServer for WordPress
- * @version 1.2.0
+ * @version 1.3.0
  */
 /*
 Plugin Name: DesktopServer for WordPress
 Plugin URI: http://serverpress.com/products/desktopserver/
 Description: DesktopServer for WordPress eases localhost to live server deployment by publishing hosting provider server details via a protected XML-RPC feed to an authorized administrator only. It also provides assisted deployments to hosting providers that support file system direct. For more information, please visit http://serverpress.com/.
 Author: Stephen Carroll
-Version: 1.2.0
+Version: 1.3.0
 Author URI: http://steveorevo.com/
 */
 class DesktopServer {
     
     public $ds_deploy;
     public $auth_error;
+    public $doc_root;
     
     function __construct(){
         add_filter( 'xmlrpc_methods', array($this, 'xmlrpc_methods') );
-        $this->ds_deploy = $_SERVER['DOCUMENT_ROOT'] . '/ds-deploy';
+        if (isset($_SERVER['REAL_DOCUMENT_ROOT'])){
+            $this->doc_root = $_SERVER['REAL_DOCUMENT_ROOT'];
+        }else{
+            $this->doc_root = $_SERVER['DOCUMENT_ROOT'];
+        }
+        $this->ds_deploy = $this->doc_root . '/ds-deploy';
         $this->error = '';
     }
     function xmlrpc_methods( $methods ){
@@ -63,7 +69,7 @@ class DesktopServer {
             $server_details[$constant] = $value;
         }
         global $wp_version;
-        $server_details['DOCUMENT_ROOT'] = $_SERVER['DOCUMENT_ROOT'];
+        $server_details['DOCUMENT_ROOT'] = $this->doc_root;
         $pdata = get_plugin_data(__FILE__);
         $server_details['DS_VERSION'] = $pdata['Version'];
         $server_details['WP_VERSION'] = $wp_version;
