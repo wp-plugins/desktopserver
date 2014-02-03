@@ -3,7 +3,7 @@ Contributors: steveorevo
 Tags: localhost, isp, hosting
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 
 DesktopServer for WordPress
@@ -17,6 +17,9 @@ DesktopServer for WordPress eases localhost to live server deployment by publish
 Upload the DesktopServer for WordPress plugin and activate it. Then using DesktopServer's export feature, select Export, followed by the "Fetch live hosting server details" checkbox. For more information, please visit http://serverpress.com/.
 
 == Changelog ==
+
+= 1.4.0 =
+* Updated support for GoDaddy's non-standard, ever changing, SUBDOMIN_DOCUMENT_ROOT definition for addon domains.
 
 = 1.3.0 =
 * Added support for GoDaddy's REAL_DOCUMENT_ROOT, supports subdomain and addon domains
