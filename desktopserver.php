@@ -1,14 +1,14 @@
 <?php
 /**
  * @package DesktopServer for WordPress
- * @version 1.3.0
+ * @version 1.4.0
  */
 /*
 Plugin Name: DesktopServer for WordPress
 Plugin URI: http://serverpress.com/products/desktopserver/
 Description: DesktopServer for WordPress eases localhost to live server deployment by publishing hosting provider server details via a protected XML-RPC feed to an authorized administrator only. It also provides assisted deployments to hosting providers that support file system direct. For more information, please visit http://serverpress.com/.
 Author: Stephen Carroll
-Version: 1.3.0
+Version: 1.4.0
 Author URI: http://steveorevo.com/
 */
 class DesktopServer {
@@ -22,7 +22,11 @@ class DesktopServer {
         if (isset($_SERVER['REAL_DOCUMENT_ROOT'])){
             $this->doc_root = $_SERVER['REAL_DOCUMENT_ROOT'];
         }else{
-            $this->doc_root = $_SERVER['DOCUMENT_ROOT'];
+            if (isset($_SERVER['SUBDOMAIN_DOCUMENT_ROOT'])){
+                $this->doc_root = $_SERVER['SUBDOMAIN_DOCUMENT_ROOT'];
+            }else{
+                $this->doc_root = $_SERVER['DOCUMENT_ROOT'];
+            }
         }
         $this->ds_deploy = $this->doc_root . '/ds-deploy';
         $this->error = '';
