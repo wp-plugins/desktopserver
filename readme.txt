@@ -1,9 +1,9 @@
 === DesktopServer for WordPress ===
 Contributors: steveorevo
-Tags: localhost, isp, hosting
+Tags: localhost, isp, hosting, deploy, copy, transfer, publish
 Requires at least: 3.0
-Tested up to: 3.5.1
-Stable tag: 1.4.0
+Tested up to: 4.1.1
+Stable tag: 1.5.0
 License: GPLv2 or later
 
 DesktopServer for WordPress
@@ -17,6 +17,12 @@ DesktopServer for WordPress eases localhost to live server deployment by publish
 Upload the DesktopServer for WordPress plugin and activate it. Then using DesktopServer's export feature, select Export, followed by the "Fetch live hosting server details" checkbox. For more information, please visit http://serverpress.com/.
 
 == Changelog ==
+
+= 1.5.0 =
+* Updated MySQL interface to PDO; resolved "Unexpected Response" pertaining to mysql_connect deprecated warnings.
+* Transfers htaccess last to prevent accidental lockout during deployment.
+* Error reporting fix provides more feedback.
+* Supports hosts running PHP 5.5.X
 
 = 1.4.0 =
 * Updated support for GoDaddy's non-standard, ever changing, SUBDOMIN_DOCUMENT_ROOT definition for addon domains.
