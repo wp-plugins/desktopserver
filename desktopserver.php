@@ -1,14 +1,14 @@
 <?php
 /**
  * @package DesktopServer for WordPress
- * @version 1.4.0
+ * @version 1.5.0
  */
 /*
 Plugin Name: DesktopServer for WordPress
 Plugin URI: http://serverpress.com/products/desktopserver/
 Description: DesktopServer for WordPress eases localhost to live server deployment by publishing hosting provider server details via a protected XML-RPC feed to an authorized administrator only. It also provides assisted deployments to hosting providers that support file system direct. For more information, please visit http://serverpress.com/.
-Author: Stephen Carroll
-Version: 1.4.0
+Author: Stephen Carnam
+Version: 1.5.0
 Author URI: http://steveorevo.com/
 */
 class DesktopServer {
@@ -118,6 +118,10 @@ class DesktopServer {
             if ( false == $wp_filesystem->mkdir( $this->ds_deploy ) ){
                 return 'Error - Cannot create ds-deploy folder. ';
             }
+            
+            // Precopy our current database_runner.php
+            $wp_filesystem->copy( __DIR__ . '/database_runner.no-execute', $this->ds_deploy . '/database_runner.php' , true );
+			$wp_filesystem->chmod( $this->ds_deploy . '/database_runner.php', FS_CHMOD_FILE );
         }
         
         // Process data chunks using WP_Filesystem where ever possible
@@ -129,7 +133,7 @@ class DesktopServer {
             
             // Decompress any compressed data chunks
             if ( $is_zip ){
-            
+            	
                 // Write chunk to temp file
                 $wp_filesystem->put_contents( $temp . '.zip', $data );
 
@@ -150,17 +154,21 @@ class DesktopServer {
                 }
             }    
             
-            // Create/append data to our file 
-            // (WP_Filesystem get/put would use too much memory for large file appending)
-            $fh = fopen( $file, 'a' );
-            if ( $fh === false ){
-                return 'Error opening ' . $file;
+            // Ignore old database_runner.php and use our new plugin version
+            if ( strpos( $file, 'database_runner.php' ) === FALSE ) {
+	            
+                // Create/append data to our file 
+				// (WP_Filesystem get/put would use too much memory for large file appending)
+	            $fh = fopen( $file, 'a' );
+	            if ( $fh === false ){
+	                return 'Error opening ' . $file;
+	            }
+	            if ( fwrite( $fh, $data ) === false ){
+	                return 'Error writing to ' . $file;
+	            }
+	            fclose( $fh );
+	            $wp_filesystem->chmod($file, FS_CHMOD_FILE);
             }
-            if ( fwrite( $fh, $data ) === false ){
-                return 'Error writing to ' . $file;
-            }
-            fclose( $fh );
-            $wp_filesystem->chmod($file, FS_CHMOD_FILE);
         }
         
         // Remove our subfolder temp files
@@ -211,7 +219,7 @@ class DesktopServer {
             }
         }
         
-        // Execute the database, if present
+        // Execute 3.5.8 and older databases, if present... these users will still get warnings.
         if ( $wp_filesystem->is_file( $this->ds_deploy . '/database.sql' ) ) {
             $buffer = $wp_filesystem->get_contents( $this->ds_deploy . '/database.sql' );
             if ( false === $buffer ){
